@@ -11,11 +11,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class OrangeGnomeController extends AbstractController
 {
-    #[Route('/', name: 'app_orange_gnome')]
+    #[Route('/orange', name: 'app_orange_gnome')]
     public function index(): Response
     {
-
-
 
 
         // Android

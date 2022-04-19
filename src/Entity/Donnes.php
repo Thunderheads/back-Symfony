@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\DonnesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: DonnesRepository::class)]
 class Donnes
@@ -13,12 +14,15 @@ class Donnes
     #[ORM\Column(type: 'integer')]
     private $id;
 
+    #[Groups('application')]
     #[ORM\Column(type: 'datetime')]
     private $dateCollect;
 
+    #[Groups('application')]
     #[ORM\Column(type: 'float')]
     private $rating;
 
+    #[Groups('application')]
     #[ORM\Column(type: 'integer')]
     private $vote;
 

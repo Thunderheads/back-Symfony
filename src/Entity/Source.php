@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\SourceRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: SourceRepository::class)]
 class Source
@@ -20,6 +21,7 @@ class Source
     #[ORM\JoinColumn(nullable: false)]
     private $application;
 
+    #[Groups('application')]
     #[ORM\ManyToOne(targetEntity: OS::class, inversedBy: 'sources')]
     #[ORM\JoinColumn(nullable: false)]
     private $os;

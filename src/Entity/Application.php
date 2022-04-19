@@ -6,24 +6,30 @@ use App\Repository\ApplicationRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ApplicationRepository::class)]
 class Application
 {
     #[ORM\Id]
+    #[Groups('application')]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private $id;
 
+    #[Groups('application')]
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
 
+    #[Groups('application')]
     #[ORM\OneToMany(mappedBy: 'application', targetEntity: Source::class)]
     private $sources;
 
+    #[Groups('application')]
     #[ORM\ManyToOne(targetEntity: Responsable::class, inversedBy: 'applications')]
     private $administrateur;
 
+    #[Groups('application')]
     #[ORM\OneToMany(mappedBy: 'application', targetEntity: Donnes::class)]
     private $datas;
 
