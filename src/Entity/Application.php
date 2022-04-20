@@ -12,24 +12,27 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Application
 {
     #[ORM\Id]
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\OneToMany(mappedBy: 'application', targetEntity: Source::class)]
     private $sources;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\ManyToOne(targetEntity: Responsable::class, inversedBy: 'applications')]
     private $administrateur;
 
-    #[Groups('application')]
+    #[Groups([ 'application'])]
     #[ORM\OneToMany(mappedBy: 'application', targetEntity: Donnes::class)]
     private $datas;
 

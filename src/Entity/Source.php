@@ -21,7 +21,8 @@ class Source
     #[ORM\JoinColumn(nullable: false)]
     private $application;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\ManyToOne(targetEntity: OS::class, inversedBy: 'sources')]
     #[ORM\JoinColumn(nullable: false)]
     private $os;

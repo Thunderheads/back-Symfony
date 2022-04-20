@@ -14,18 +14,22 @@ class Donnes
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\Column(type: 'datetime')]
     private $dateCollect;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\Column(type: 'float')]
     private $rating;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\Column(type: 'integer')]
     private $vote;
 
+    #[Groups(['donnes'])]
     #[ORM\ManyToOne(targetEntity: Application::class, inversedBy: 'datas')]
     #[ORM\JoinColumn(nullable: false)]
     private $application;

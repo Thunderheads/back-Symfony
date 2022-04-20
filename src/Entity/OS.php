@@ -16,7 +16,8 @@ class OS
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups('application')]
+    #[Groups(['donnes', 'application'])]
+
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
 

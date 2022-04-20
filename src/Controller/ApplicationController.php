@@ -13,6 +13,7 @@ class ApplicationController extends AbstractController
     #[Route('/api/application', name: 'application_all', methods: ['GET'])]
     public function getAll(ApplicationRepository $applicationRepo): Response
     {
+        //pour recuperer les dates du jour dd((new \DateTime())->format('Y-m-d'));
         return $this->json($applicationRepo->findAll(),200, [],['groups'=>'application']);
 
     }
