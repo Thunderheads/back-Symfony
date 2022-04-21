@@ -15,7 +15,7 @@ class DonnesController extends AbstractController
     {
 
         $date = (new \DateTime('-1 year'))->format('Y-m-d');
-        return $this->json($donnesRepository->findBy(array('dateCollect'=>new \DateTime($date))),200, [],['groups'=>'donnes']);
+        return $this->json($donnesRepository->findAll(),200, [],['groups'=>'donnes']);
 
     }
 }

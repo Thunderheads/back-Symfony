@@ -45,22 +45,42 @@ class ApplicationRepository extends ServiceEntityRepository
         }
     }
 
-    // /**
-    //  * @return Application[] Returns an array of Application objects
-    //  */
-    /*
-    public function findByExampleField($value)
+     /**
+      *
+      * Fonction en charge de recuperer les données deux derniers jours
+      *
+      * @return Application[] Returns an array of Application objects
+      */
+
+    public function findTwoLastDayData()
     {
+        $now =  (new \DateTime('now'))->format('Y-m-d');
+        $yesterday = (new \DateTime('-1 day'))->format('Y-m-d');
+
         return $this->createQueryBuilder('a')
-            ->andWhere('a.exampleField = :val')
-            ->setParameter('val', $value)
+            ->innerJoin('a.datas', 'd')
+            ->where('d.dateCollect > :now')
+            ->setParameter(':now', new \DateTime('2022-04-10'))
+            //->setParameter(':now', new \DateTime('2021-04-19'))
+            //->andWhere('d.dateCollect = :yesterday')
+            //->setParameter(':yesterday', new \DateTime($yesterday))
             ->orderBy('a.id', 'ASC')
-            ->setMaxResults(10)
             ->getQuery()
             ->getResult()
         ;
     }
-    */
+
+    public function test(){
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql = 'SELECT * FROM `application` INNER JOIN `donnes` ON donnes.application_id = application.id WHERE donnes.date_collect = 2022-04-20 00:00:00 OR donnes.date_collect = 2022-04-21 00:00:00  ';
+        $stmt = $conn->prepare($sql);
+        $resultSet = $stmt->executeQuery(['now' => '2021-04-20 00:00:00', 'yesterday' => '2022-04-19 00:00:00']);
+
+        // returns an array of arrays (i.e. a raw data set)
+        return $resultSet->fetchAllAssociative();
+    }
 
     /*
     public function findOneBySomeField($value): ?Application

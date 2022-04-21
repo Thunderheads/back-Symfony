@@ -73,4 +73,27 @@ class DonnesRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    /*
+    public function findTwoLastDayData()
+    {
+        $now =  (new \DateTime('now'))->format('Y-m-d');
+        $yesterday = (new \DateTime('-1 day'))->format('Y-m-d');
+
+        return $this->createQueryBuilder('d')
+            ->select('d')
+            ->where('d.dateCollect = :now')
+            ->setParameter(':now', '2022-03-17 00:00:00')
+            ->orWhere('d.dateCollect = :yesterday')
+            ->setParameter(':yesterday', '2022-03-18 00:00:00')
+            //->setParameter(':now', new \DateTime('2021-04-19'))
+            //->andWhere('d.dateCollect = :yesterday')
+            //->setParameter(':yesterday', new \DateTime($yesterday))
+
+            ->getQuery()
+
+            ->getResult()
+            ;
+    }
+    */
 }
