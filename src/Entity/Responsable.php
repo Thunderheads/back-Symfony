@@ -16,12 +16,12 @@ class Responsable
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source'])]
 
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source'])]
 
     #[ORM\Column(type: 'string', length: 255)]
     private $prenom;

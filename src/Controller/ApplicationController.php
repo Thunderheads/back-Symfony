@@ -23,7 +23,7 @@ class ApplicationController extends AbstractController
                 }
             }
     }
-        return $this->json($applications,200, [],['groups'=>'application']);
+        return $this->json($applicationRepo->test(),200, [],['groups'=>'application']);
     }
 
     #[Route('/api/application/{id}', name: 'application_id', methods: ['GET'])]

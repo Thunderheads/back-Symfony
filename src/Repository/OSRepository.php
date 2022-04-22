@@ -45,6 +45,17 @@ class OSRepository extends ServiceEntityRepository
         }
     }
 
+    public function findByAppID($id){
+
+        $conn = $this->getEntityManager()->getConnection();
+        $sql = 'SELECT * FROM os INNER JOIN donnes as d ON d.os_id = os.id INNER JOIN application on application.id = d.application_id where application.id = :id';
+
+
+        $stmt = $conn->prepare($sql);
+        $resultSet = $stmt->executeQuery(['id'=>$id]);
+
+        return $resultSet->fetchAllAssociative();
+    }
     // /**
     //  * @return OS[] Returns an array of OS objects
     //  */

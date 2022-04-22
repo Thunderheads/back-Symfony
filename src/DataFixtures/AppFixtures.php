@@ -27,11 +27,15 @@ class AppFixtures extends Fixture
 
         $this->manager = $manager;
 
-        $this->oSFixture();
-        $this->applicationFixture();
-        $this->responsableFixture();
-        $this->donnesFixture();
-        $this->sourceFixture();
+        //$this->oSFixture();
+        //$this->responsableFixture();
+
+        //$this->applicationFixture();
+
+
+        // a lancé deux fois en modifiant l'id
+        //$this->donnesFixture();
+        //$this->sourceFixture();
     }
 
     private function oSFixture()
@@ -82,6 +86,7 @@ class AppFixtures extends Fixture
             $responsable->setPrenom($lstPrenom[$i]);
             $this->manager->persist($responsable);
         }
+        $this->manager->flush();
     }
 
     private function donnesFixture()
@@ -95,6 +100,8 @@ class AppFixtures extends Fixture
                 $donnes->setDateCollect(new \DateTime($this->getDayOfYear()[$j]));
                 //premier chiffre = nb chiffre apres la virgule.
                 // deuxieme et troisième chiffres la range
+                $os = $this->manager->getRepository(OS::class)->findAll();
+                $donnes->setOs($os[1]);
                 $donnes->setRating($this->faker->randomFloat(2, 1, 5));
                 $donnes->setVote($this->faker->randomNumber(4, false));
                 $this->manager->persist($donnes);

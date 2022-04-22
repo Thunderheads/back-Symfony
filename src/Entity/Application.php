@@ -17,7 +17,7 @@ class Application
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source', 'os'])]
 
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
@@ -27,12 +27,12 @@ class Application
     #[ORM\OneToMany(mappedBy: 'application', targetEntity: Source::class)]
     private $sources;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source'])]
 
     #[ORM\ManyToOne(targetEntity: Responsable::class, inversedBy: 'applications')]
     private $administrateur;
 
-    #[Groups([ 'application'])]
+    #[Groups([ 'application', 'source'])]
     #[ORM\OneToMany(mappedBy: 'application', targetEntity: Donnes::class)]
     private $datas;
 

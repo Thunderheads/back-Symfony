@@ -45,16 +45,16 @@ class ApplicationRepository extends ServiceEntityRepository
         }
     }
 
-     /**
-      *
-      * Fonction en charge de recuperer les données deux derniers jours
-      *
-      * @return Application[] Returns an array of Application objects
-      */
+    /**
+     *
+     * Fonction en charge de recuperer les données deux derniers jours
+     *
+     * @return Application[] Returns an array of Application objects
+     */
 
     public function findTwoLastDayData()
     {
-        $now =  (new \DateTime('now'))->format('Y-m-d');
+        $now = (new \DateTime('now'))->format('Y-m-d');
         $yesterday = (new \DateTime('-1 day'))->format('Y-m-d');
 
         return $this->createQueryBuilder('a')
@@ -66,17 +66,53 @@ class ApplicationRepository extends ServiceEntityRepository
             //->setParameter(':yesterday', new \DateTime($yesterday))
             ->orderBy('a.id', 'ASC')
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
-    public function test(){
+    public function test()
+    {
 
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql = 'SELECT * FROM `application` INNER JOIN `donnes` ON donnes.application_id = application.id WHERE donnes.date_collect = 2022-04-20 00:00:00 OR donnes.date_collect = 2022-04-21 00:00:00  ';
+        $sql =
+            'SELECT A.*, B.vote vote_hier, (A.vote - B.vote) diff
+                FROM ( SELECT android.* , iOS.plateforme2 FROM (
+                SELECT application.id, application.nom nom_application, rating, vote,  CONCAT(responsable.nom,:vide, responsable.prenom) responsable, os.nom plateforme1 FROM `application`
+ INNER JOIN `donnes` ON donnes.application_id = application.id
+ INNER JOIN `responsable` ON responsable.id = application.administrateur_id
+ INNER JOIN `source` ON source.application_id = application.id
+ INNER JOIN `os` ON os.id = source.os_id
+ 
+ WHERE donnes.date_collect = :yesterday AND os.nom = :android GROUP BY donnes.id) AS android
+JOIN ( SELECT application.id, application.nom , rating, vote,  CONCAT(responsable.nom, responsable.prenom) responsable, os.nom  plateforme2 FROM `application`
+ INNER JOIN `donnes` ON donnes.application_id = application.id
+ INNER JOIN `responsable` ON responsable.id = application.administrateur_id
+ INNER JOIN `source` ON source.application_id = application.id
+ INNER JOIN `os` ON os.id = source.os_id
+ 
+ WHERE donnes.date_collect = :yesterday AND os.nom = :iOS GROUP BY donnes.id
+) AS iOS ON android.id = iOS.id
+) AS A
+JOIN ( SELECT android.* , iOS.plateforme2 FROM (
+SELECT application.id , application.nom , rating, vote,  CONCAT(responsable.nom, :vide ,responsable.prenom) responsable, os.nom plateforme1 FROM `application`
+ INNER JOIN `donnes` ON donnes.application_id = application.id
+ INNER JOIN `responsable` ON responsable.id = application.administrateur_id
+ INNER JOIN `source` ON source.application_id = application.id
+ INNER JOIN `os` ON os.id = source.os_id
+ 
+ WHERE donnes.date_collect = :now AND os.nom = :android GROUP BY donnes.id) AS android
+JOIN ( SELECT application.id, application.nom , rating, vote,  CONCAT(responsable.nom, responsable.prenom) responsable, os.nom  plateforme2 FROM `application`
+ INNER JOIN `donnes` ON donnes.application_id = application.id
+ INNER JOIN `responsable` ON responsable.id = application.administrateur_id
+ INNER JOIN `source` ON source.application_id = application.id
+ INNER JOIN `os` ON os.id = source.os_id
+ 
+ WHERE donnes.date_collect = :now AND os.nom = :iOS GROUP BY donnes.id
+) AS iOS ON android.id = iOS.id
+) AS B
+ON A.id = B.id' ;
         $stmt = $conn->prepare($sql);
-        $resultSet = $stmt->executeQuery(['now' => '2021-04-20 00:00:00', 'yesterday' => '2022-04-19 00:00:00']);
+        $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00', 'iOS' => 'iOS', 'android' => 'android', 'vide' => ' ']);
 
         // returns an array of arrays (i.e. a raw data set)
         return $resultSet->fetchAllAssociative();

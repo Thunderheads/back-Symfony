@@ -14,25 +14,30 @@ class Donnes
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source','os'])]
 
     #[ORM\Column(type: 'datetime')]
     private $dateCollect;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source', 'os'])]
 
     #[ORM\Column(type: 'float')]
     private $rating;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application','source', 'os'])]
 
     #[ORM\Column(type: 'integer')]
     private $vote;
 
-    #[Groups(['donnes'])]
+    #[Groups(['donnes', 'os'])]
     #[ORM\ManyToOne(targetEntity: Application::class, inversedBy: 'datas')]
     #[ORM\JoinColumn(nullable: false)]
     private $application;
+
+    #[Groups(['donnes', 'application', 'source'])]
+    #[ORM\ManyToOne(targetEntity: OS::class, inversedBy: 'donnes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private $os;
 
     public function getId(): ?int
     {
@@ -83,6 +88,18 @@ class Donnes
     public function setApplication(?Application $application): self
     {
         $this->application = $application;
+
+        return $this;
+    }
+
+    public function getOs(): ?OS
+    {
+        return $this->os;
+    }
+
+    public function setOs(?OS $os): self
+    {
+        $this->os = $os;
 
         return $this;
     }

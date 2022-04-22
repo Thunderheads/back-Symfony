@@ -17,11 +17,12 @@ class Source
     #[ORM\Column(type: 'string', length: 255)]
     private $url;
 
+    #[Groups(['source'])]
     #[ORM\ManyToOne(targetEntity: Application::class, inversedBy: 'sources')]
     #[ORM\JoinColumn(nullable: false)]
     private $application;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source'])]
 
     #[ORM\ManyToOne(targetEntity: OS::class, inversedBy: 'sources')]
     #[ORM\JoinColumn(nullable: false)]

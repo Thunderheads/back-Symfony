@@ -16,7 +16,7 @@ class OS
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'source', 'os'])]
 
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
@@ -24,9 +24,14 @@ class OS
     #[ORM\OneToMany(mappedBy: 'os', targetEntity: Source::class)]
     private $sources;
 
+    #[Groups([ 'os'])]
+    #[ORM\OneToMany(mappedBy: 'os', targetEntity: Donnes::class)]
+    private $donnes;
+
     public function __construct()
     {
         $this->sources = new ArrayCollection();
+        $this->donnes = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -75,4 +80,37 @@ class OS
 
         return $this;
     }
+
+    /**
+     * @return Collection<int, Donnes>
+     */
+    public function getDonnes(): Collection
+    {
+        return $this->donnes;
+    }
+
+    public function addDonne(Donnes $donne): self
+    {
+        if (!$this->donnes->contains($donne)) {
+            $this->donnes[] = $donne;
+            $donne->setOs($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDonne(Donnes $donne): self
+    {
+        if ($this->donnes->removeElement($donne)) {
+            // set the owning side to null (unless already changed)
+            if ($donne->getOs() === $this) {
+                $donne->setOs(null);
+            }
+        }
+
+        return $this;
+    }
+
+
+
 }
