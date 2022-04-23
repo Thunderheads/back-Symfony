@@ -101,14 +101,13 @@ class AppFixtures extends Fixture
                 //premier chiffre = nb chiffre apres la virgule.
                 // deuxieme et troisième chiffres la range
                 $os = $this->manager->getRepository(OS::class)->findAll();
-                $donnes->setOs($os[1]);
+                $donnes->setOs($os[0]);
                 $donnes->setRating($this->faker->randomFloat(2, 1, 5));
                 $donnes->setVote($this->faker->randomNumber(4, false));
                 $this->manager->persist($donnes);
             }
         }
         $this->manager->flush();
-
     }
     private function getDayOfYear(): ArrayCollection{
         $from = new \DateTime('-1 year');

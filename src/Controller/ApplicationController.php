@@ -14,15 +14,7 @@ class ApplicationController extends AbstractController
     public function getAll(ApplicationRepository $applicationRepo): Response
     {
         //pour recuperer les dates du jour dd((new \DateTime())->format('Y-m-d'));
-        $applications = $applicationRepo->findAll();
-        foreach ($applications as $application){
-            foreach ($application->getDatas() as $key => $data) {
-                if ($data->getDateCollect() == new \DateTime('2022-03-18') || $data->getDateCollect() == new \DateTime('2022-03-17')) {
-                } else {
-                    $application->getDatas()->remove($key);
-                }
-            }
-    }
+
         return $this->json($applicationRepo->test(),200, [],['groups'=>'application']);
     }
 

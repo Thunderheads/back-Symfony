@@ -52,22 +52,6 @@ class ApplicationRepository extends ServiceEntityRepository
      * @return Application[] Returns an array of Application objects
      */
 
-    public function findTwoLastDayData()
-    {
-        $now = (new \DateTime('now'))->format('Y-m-d');
-        $yesterday = (new \DateTime('-1 day'))->format('Y-m-d');
-
-        return $this->createQueryBuilder('a')
-            ->innerJoin('a.datas', 'd')
-            ->where('d.dateCollect > :now')
-            ->setParameter(':now', new \DateTime('2022-04-10'))
-            //->setParameter(':now', new \DateTime('2021-04-19'))
-            //->andWhere('d.dateCollect = :yesterday')
-            //->setParameter(':yesterday', new \DateTime($yesterday))
-            ->orderBy('a.id', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
 
     public function test()
     {
@@ -75,44 +59,25 @@ class ApplicationRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
 
         $sql =
-            'SELECT A.*, B.vote vote_hier, (A.vote - B.vote) diff
-                FROM ( SELECT android.* , iOS.plateforme2 FROM (
-                SELECT application.id, application.nom nom_application, rating, vote,  CONCAT(responsable.nom,:vide, responsable.prenom) responsable, os.nom plateforme1 FROM `application`
- INNER JOIN `donnes` ON donnes.application_id = application.id
- INNER JOIN `responsable` ON responsable.id = application.administrateur_id
- INNER JOIN `source` ON source.application_id = application.id
- INNER JOIN `os` ON os.id = source.os_id
- 
- WHERE donnes.date_collect = :yesterday AND os.nom = :android GROUP BY donnes.id) AS android
-JOIN ( SELECT application.id, application.nom , rating, vote,  CONCAT(responsable.nom, responsable.prenom) responsable, os.nom  plateforme2 FROM `application`
- INNER JOIN `donnes` ON donnes.application_id = application.id
- INNER JOIN `responsable` ON responsable.id = application.administrateur_id
- INNER JOIN `source` ON source.application_id = application.id
- INNER JOIN `os` ON os.id = source.os_id
- 
- WHERE donnes.date_collect = :yesterday AND os.nom = :iOS GROUP BY donnes.id
-) AS iOS ON android.id = iOS.id
+            'SELECT A.id app_id, A.nom app_nom, A.os, A.rating, A.vote vote_jour, (A.vote - B.vote) diff
+FROM (
+    SELECT application.id, application.nom, os.nom os, donnes.date_collect, donnes.vote, donnes.rating FROM `application` INNER JOIN donnes ON donnes.application_id = application.id
+INNER JOIN `os` ON os.id = donnes.os_id
+INNER JOIN `responsable` ON responsable.id = application.administrateur_id
+WHERE donnes.date_collect = :now
+GROUP BY donnes.id
 ) AS A
-JOIN ( SELECT android.* , iOS.plateforme2 FROM (
-SELECT application.id , application.nom , rating, vote,  CONCAT(responsable.nom, :vide ,responsable.prenom) responsable, os.nom plateforme1 FROM `application`
- INNER JOIN `donnes` ON donnes.application_id = application.id
- INNER JOIN `responsable` ON responsable.id = application.administrateur_id
- INNER JOIN `source` ON source.application_id = application.id
- INNER JOIN `os` ON os.id = source.os_id
- 
- WHERE donnes.date_collect = :now AND os.nom = :android GROUP BY donnes.id) AS android
-JOIN ( SELECT application.id, application.nom , rating, vote,  CONCAT(responsable.nom, responsable.prenom) responsable, os.nom  plateforme2 FROM `application`
- INNER JOIN `donnes` ON donnes.application_id = application.id
- INNER JOIN `responsable` ON responsable.id = application.administrateur_id
- INNER JOIN `source` ON source.application_id = application.id
- INNER JOIN `os` ON os.id = source.os_id
- 
- WHERE donnes.date_collect = :now AND os.nom = :iOS GROUP BY donnes.id
-) AS iOS ON android.id = iOS.id
+
+JOIN (
+    SELECT application.id, application.nom, os.nom os, donnes.date_collect, donnes.vote, donnes.rating FROM `application` INNER JOIN donnes ON donnes.application_id = application.id
+INNER JOIN `os` ON os.id = donnes.os_id
+INNER JOIN `responsable` ON responsable.id = application.administrateur_id
+WHERE donnes.date_collect = :yesterday
+GROUP BY donnes.id
 ) AS B
-ON A.id = B.id' ;
+ON A.id = B.id AND A.os = B.os;' ;
         $stmt = $conn->prepare($sql);
-        $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00', 'iOS' => 'iOS', 'android' => 'android', 'vide' => ' ']);
+        $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00']);
 
         // returns an array of arrays (i.e. a raw data set)
         return $resultSet->fetchAllAssociative();
