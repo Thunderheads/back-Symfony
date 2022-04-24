@@ -38,12 +38,12 @@ class ApplicationController extends AbstractController
         //$urlATester = $sortieRequest->urlATester;
         //$isInsert = $sortieRequest->isInsert ;
 
-        $urlIOSpourTest = "https://apps.apple.com/fr/app/leboncoin/id484115113";
+        $urlIOSpourTest = "https://apps.apple.com/fr/app/leboncoin/id484115113?";
         $urlAndroidpourTest = "https://play.google.com/store/apps/details?id=fr.leboncoin&hl=fr&gl=US";
 
         $id = $this->getAndroidID($urlAndroidpourTest);
-        $apple = "apps.apple.com";
-
+        $apple = "https://apps.apple.com";
+        $googleplay ="https://play.google.com";
 
 
 
@@ -74,8 +74,23 @@ class ApplicationController extends AbstractController
 
         //nombre avis en k
         $app_nombreAvis = $crawler->filter($classCssNbAvis)->innerText();
+        $app_nombreAvisAPoint = str_replace(",", ".", $app_nombreAvis);
 
-        dd($app_nombreAvis);
+        // si $app-nombe avis contient un k pour mille
+        $positionK = strpos($app_nombreAvisAPoint, "k");
+
+        // si $app-nombe avis contient un k pour millions
+        $positionM = strpos($app_nombreAvisAPoint, "M");
+        if(is_int($positionK)){
+            $app_nombreAvis = floatval($app_nombreAvisAPoint)*1000;
+        } else if(is_int($positionM)) {
+            $app_nombreAvis = floatval($app_nombreAvisAPoint)*1000000;
+        }else {
+            }
+            $app_nombreAvis = floatval($app_nombreAvisAPoint);
+
+
+
 
 
 
