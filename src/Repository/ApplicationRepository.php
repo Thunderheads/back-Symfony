@@ -3,7 +3,11 @@
 namespace App\Repository;
 
 use App\Entity\Application;
+use App\Entity\Donnes;
+use App\Entity\Source;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -16,8 +20,11 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ApplicationRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private OSRepository $osRepository;
+
+    public function __construct(ManagerRegistry $registry, OSRepository $osRepository)
     {
+        $this->osRepository = $osRepository;
         parent::__construct($registry, Application::class);
     }
 
@@ -81,6 +88,49 @@ ON A.id = B.id AND A.os = B.os;' ;
 
         // returns an array of arrays (i.e. a raw data set)
         return $resultSet->fetchAllAssociative();
+    }
+
+
+    public function addApplication($information , $applicationNom, $urlATester) {
+        // instancier des objects
+
+        $donnes = new Donnes();
+        $application = new Application();
+        $source = new Source();
+        $os = $this->osRepository->findOneBy(["nom"=>$information['app_os']]);
+
+        // remplir les objets
+        //$application->addData();
+        if($applicationNom != 'undefined'){
+            $application->setNom($applicationNom);
+        } else {
+            $application->setNom($information['app_nom']);
+        }
+
+        $this->getEntityManager()->persist($application);
+        $this->getEntityManager()->flush();
+
+
+
+        $donnes->setOs($os);
+        $donnes->setVote($information["app_nombreAvis"]);
+        $donnes->setDateCollect(new \DateTime((new \DateTime('now'))->format('Y-m-d')));
+        $donnes->setRating((float)($information["app_note"]));
+        $donnes->setApplication($application);
+        $this->getEntityManager()->persist($donnes);
+        $this->getEntityManager()->flush();
+
+
+
+        $source->setOs($os);
+        $source->setApplication($application);
+        $source->setUrl($urlATester);
+
+        $this->getEntityManager()->persist($source);
+        $this->getEntityManager()->flush();
+
+
+        return $application;
     }
 
     /*
