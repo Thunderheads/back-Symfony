@@ -62,14 +62,14 @@ class ApplicationController extends AbstractController
             if($data != null){
                 return $this->json($data,200, []);
             } else {
-                return $this->json($data,404, []);
+                return $this->json($data,400, []);
             }
         } else{
             $data = $scrapping->getInformation($urlATester);
             if($data != null){
                 return $this->json($data,200, []);
             } else {
-                return $this->json($data,404, []);
+                return $this->json($data,400, []);
             }
         }
     }
