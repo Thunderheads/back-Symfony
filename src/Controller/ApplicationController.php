@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Application;
 use App\Repository\ApplicationRepository;
+use App\Repository\SourceRepository;
 use App\Service\Scrapping;
 use Goutte\Client;
 use Raulr\GooglePlayScraper\Exception\NotFoundException;
@@ -16,17 +17,28 @@ use Symfony\Component\Routing\Annotation\Route;
 class ApplicationController extends AbstractController
 {
     #[Route('/api/application', name: 'application_all_get', methods: ['GET'])]
-    public function getAll(ApplicationRepository $applicationRepo): Response
+    public function getAll(ApplicationRepository $applicationRepo, SourceRepository $sourceRepository, Scrapping $scrapping): Response
     {
-        //pour recuperer les dates du jour dd((new \DateTime())->format('Y-m-d'));
 
         return $this->json($applicationRepo->test(),200, [],['groups'=>'application']);
     }
 
-    #[Route('/api/application/{id}', name: 'application_id_get', methods: ['GET'])]
-    public function getID(Application $application): Response
+    // route qui renvoie le nom et l'id de l'application
+    #[Route('/api/application/name', name: 'application_all_get_name', methods: ['GET'])]
+    public function getAllName(ApplicationRepository $applicationRepo, SourceRepository $sourceRepository, Scrapping $scrapping): Response
     {
-        return $this->json($application,200, [],['groups'=>'application']);
+
+        return $this->json($applicationRepo->findAll(),200, [],['groups'=>'application_name']);
+    }
+
+    #[Route('/api/application/param', name: 'application_id_get', methods: ['GET'])]
+    public function getID(ApplicationRepository $applicationRepo, Request $req): Response
+    {
+
+        //pour recuperer les dates du jour dd((new \DateTime())->format('Y-m-d'));
+        $id = $req->query->get('id');
+        $ordre = $req->query->get('ordre');
+        return $this->json($applicationRepo->test($id, $ordre),200, [],['groups'=>'application']);
 
     }
 

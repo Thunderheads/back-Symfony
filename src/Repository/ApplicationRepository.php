@@ -15,7 +15,6 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @method Application|null find($id, $lockMode = null, $lockVersion = null)
  * @method Application|null findOneBy(array $criteria, array $orderBy = null)
- * @method Application[]    findAll()
  * @method Application[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class ApplicationRepository extends ServiceEntityRepository
@@ -28,6 +27,9 @@ class ApplicationRepository extends ServiceEntityRepository
         parent::__construct($registry, Application::class);
     }
 
+    public function findAll(){
+        return $this->findBy(array(), array('nom' => 'ASC'));
+    }
     /**
      * @throws ORMException
      * @throws OptimisticLockException
@@ -60,12 +62,11 @@ class ApplicationRepository extends ServiceEntityRepository
      */
 
 
-    public function test()
+    public function test($id = 0, $ordre = null)
     {
-
         $conn = $this->getEntityManager()->getConnection();
 
-        $sql =
+        $sql =  $sql =
             'SELECT A.id app_id, A.nom app_nom, A.os, A.rating, A.vote vote_jour, (A.vote - B.vote) diff
 FROM (
     SELECT application.id, application.nom, os.nom os, donnes.date_collect, donnes.vote, donnes.rating FROM `application` INNER JOIN donnes ON donnes.application_id = application.id
@@ -82,15 +83,72 @@ INNER JOIN `responsable` ON responsable.id = application.administrateur_id
 WHERE donnes.date_collect = :yesterday
 GROUP BY donnes.id
 ) AS B
-ON A.id = B.id AND A.os = B.os;' ;
+ON A.id = B.id AND A.os = B.os' ;
+
+        // cas id mais pas ordre
+        if($id != 0 && $ordre == null){
+
+
+            $sql = $sql . ' WHERE A.id = :id;';
+            $stmt = $conn->prepare($sql);
+            $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00', 'id' => $id]);
+
+            // returns an array of arrays (i.e. a raw data set)
+            return $resultSet->fetchAllAssociative();
+        }
+
+
+        // cas ordre mais pas id
+        if($id == 0 && $ordre != null){
+
+            if($ordre == 'croissant'){
+                $sql = $sql . ' ORDER BY rating ;';
+            }else {
+                $sql = $sql . ' ORDER BY rating DESC;';
+            }
+            $stmt = $conn->prepare($sql);
+            $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00']);
+
+            // returns an array of arrays (i.e. a raw data set)
+            return $resultSet->fetchAllAssociative();
+        }
+
+        // cas les deux
+        if($id != 0 && $ordre != null){
+            $sql = $sql . ' WHERE A.id = :id ';
+            if($ordre == 'croissant'){
+                $sql = $sql . 'ORDER BY rating ;';
+            }else {
+                $sql = $sql . 'ORDER BY rating DESC;';
+            }
+
+            $stmt = $conn->prepare($sql);
+            $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00', 'id' => $id]);
+
+            // returns an array of arrays (i.e. a raw data set)
+            return $resultSet->fetchAllAssociative();
+        }
+
+        $sql = $sql . ';';
         $stmt = $conn->prepare($sql);
         $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00']);
 
         // returns an array of arrays (i.e. a raw data set)
         return $resultSet->fetchAllAssociative();
+
+
     }
 
 
+    /**
+     * Fonction en charge d'ajouter une application et de recuperer la donnée actuelle
+     *
+     * @param $information
+     * @param $applicationNom
+     * @param $urlATester
+     * @return Application
+     * @throws \Exception
+     */
     public function addApplication($information , $applicationNom, $urlATester) {
         // instancier des objects
 
@@ -102,7 +160,9 @@ ON A.id = B.id AND A.os = B.os;' ;
         // remplir les objets
         //$application->addData();
         if($applicationNom != 'undefined'){
+
             $application->setNom($applicationNom);
+
         } else {
             $application->setNom($information['app_nom']);
         }

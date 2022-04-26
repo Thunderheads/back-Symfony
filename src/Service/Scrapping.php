@@ -3,7 +3,11 @@
 namespace App\Service;
 
 use App\Entity\Application;
+use App\Entity\Donnes;
 use App\Repository\ApplicationRepository;
+use App\Repository\DonnesRepository;
+use App\Repository\OSRepository;
+use App\Repository\SourceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Goutte\Client;
 use InvalidArgumentException;
@@ -14,13 +18,54 @@ class Scrapping
 {
 
     private ApplicationRepository $applicationRepository;
+    private SourceRepository $sourceRepository;
+    private DonnesRepository $donnesRepository;
+    private OSRepository $oSRepository;
 
-    public function __construct( ApplicationRepository $applicationRepository)
+    public function __construct( ApplicationRepository $applicationRepository,
+                                 SourceRepository $sourceRepository,
+                                 DonnesRepository $donnesRepository,
+    OSRepository $oSRepository
+    )
     {
         $this->applicationRepository = $applicationRepository;
+        $this->sourceRepository = $sourceRepository;
+        $this->donnesRepository = $donnesRepository;
+    }
+
+
+    /**
+     * Fonction en charge d'ajouter les données
+     *
+     * @return void
+     * @throws \Doctrine\DBAL\Exception
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function insertDailyData(){
+
+        // on recupere toute les urls en bases de données
+        $lstSources = $this->sourceRepository->findAllCustom();
+
+        foreach ($lstSources as $source){
+            // on lance la fonction getInformation sur ces urls
+            dd(new \DateTime((new \DateTime('now'))->format('Y-m-d')));
+            $information = $this->getInformation($source['url']);
+            // on crée des objet données que l'on rajoute à la bonne application on spécifiant la version (ios ou android)
+            $donnes = new Donnes();
+            $donnes->setApplication($this->applicationRepository->find($source['application_id']));
+            $donnes->setOs($this->oSRepository->find($source['os_id']));
+            $donnes->setRating($information["app_note"]);
+            $donnes->setDateCollect(new \DateTime((new \DateTime('now'))->format('Y-m-d')));
+            $donnes->setVote($information["app_nombreAvis"]);
+            $this->donnesRepository->add($donnes);
+        }
+
     }
 
     /**
+     * Fonction en charge d'inserer une application en base de données
+     *
      * @param $urlATester
      * @param $nomApplication
      * @return Application
@@ -34,6 +79,7 @@ class Scrapping
     }
     /**
      * Fonction en charge de tester l'url et de renvoyer les informations obtenues
+     *
      * @param String $url
      * @return array|ArrayCollection|null
      */

@@ -73,4 +73,22 @@ class SourceRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    /**
+     * Permet de récuperer toutes les colonnes de la table source
+     *
+     * @return \mixed[][]
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function findAllCustom(){
+        $conn = $this->getEntityManager()->getConnection();
+
+        $sql =
+            'SELECT * FROM `source`' ;
+        $stmt = $conn->prepare($sql);
+        $resultSet = $stmt->executeQuery([]);
+
+        return $resultSet->fetchAllAssociative();
+
+    }
 }

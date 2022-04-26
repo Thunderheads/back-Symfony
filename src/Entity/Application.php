@@ -12,12 +12,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
 class Application
 {
     #[ORM\Id]
-    #[Groups(['donnes', 'application'])]
+    #[Groups(['donnes', 'application', 'application_name'])]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     private $id;
 
-    #[Groups(['donnes', 'application', 'source', 'os'])]
+    #[Groups(['donnes', 'application', 'source', 'os', 'application_name'])]
 
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
