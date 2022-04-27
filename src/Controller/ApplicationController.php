@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Application;
 use App\Repository\ApplicationRepository;
 use App\Repository\SourceRepository;
+use App\Service\CSVManager;
 use App\Service\Scrapping;
 use Goutte\Client;
 use Raulr\GooglePlayScraper\Exception\NotFoundException;
@@ -16,6 +17,19 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ApplicationController extends AbstractController
 {
+    #[Route('/api/application/csv', name: 'application_csv', methods: ['GET'])]
+    public function getCSVfile( CSVManager $CSVManager): Response
+    {
+        return $CSVManager->generateCsvAction();
+    }
+
+    #[Route('/api/application/{id}', name: 'application_get_by_id', methods: ['GET'])]
+    public function getById(ApplicationRepository $applicationRepo , $id): Response
+    {
+
+        return $this->json($applicationRepo->find($id),200, [],['groups'=>'application']);
+    }
+
     #[Route('/api/application', name: 'application_all_get', methods: ['GET'])]
     public function getAll(ApplicationRepository $applicationRepo, SourceRepository $sourceRepository, Scrapping $scrapping): Response
     {

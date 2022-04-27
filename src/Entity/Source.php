@@ -14,6 +14,7 @@ class Source
     #[ORM\Column(type: 'integer')]
     private $id;
 
+    #[Groups(['application'])]
     #[ORM\Column(type: 'string', length: 255)]
     private $url;
 

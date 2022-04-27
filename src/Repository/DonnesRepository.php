@@ -7,6 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * @method Donnes|null find($id, $lockMode = null, $lockVersion = null)
@@ -45,6 +46,53 @@ class DonnesRepository extends ServiceEntityRepository
         }
     }
 
+
+    public function getAllByID(){
+
+        $sql = 'SELECT application.nom, donnes.date_collect , donnes.rating, donnes.vote, os.nom os FROM `donnes` INNER JOIN os ON os.id =donnes.os_id INNER JOIN application ON application.id = donnes.application_id WHERE application_id = 2;';
+        $conn = $this->getEntityManager()->getConnection();
+        $stmt = $conn->prepare($sql);
+        $resultSet = $stmt->executeQuery([]);
+
+        $response = new StreamedResponse();
+
+        $response->setCallback(function() use($resultSet){
+
+            $handle = fopen('php://output', 'w+');
+            // Nom des colonnes du CSV
+            fputcsv($handle, array('Nom',
+                'Date Collect',
+                'Note',
+                'Nombre de commentaire',
+                'OS'
+            ),';');
+
+            //Champs
+            while( $row = $resultSet->fetch() )
+            {
+
+                fputcsv($handle,array($row['nom'],
+                    $row['date_collect'],
+                    $row['rating'],
+                    $row['vote'],
+                    $row['os']
+
+                ),';');
+
+            }
+
+            fclose($handle);
+        });
+
+
+        $response->setStatusCode(200);
+        $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+        $response->headers->set('Content-Disposition','attachment; filename="export.csv"');
+
+        return $response;
+
+
+    }
     // /**
     //  * @return Donnes[] Returns an array of Donnes objects
     //  */
