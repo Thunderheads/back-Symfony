@@ -86,7 +86,7 @@ class ApplicationRepository extends ServiceEntityRepository
 
             $sql = $sql . ' WHERE A.id = :id;';
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' => (new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day"), 'id' => $id]);
+            $resultSet = $stmt->executeQuery(['now' => (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s'), 'id' => $id]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -101,7 +101,7 @@ class ApplicationRepository extends ServiceEntityRepository
                 $sql = $sql . ' ORDER BY rating DESC;';
             }
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' => (new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day")]);
+            $resultSet = $stmt->executeQuery(['now' => (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s')]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -117,7 +117,7 @@ class ApplicationRepository extends ServiceEntityRepository
             }
 
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' =>(new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day"), 'id' => $id]);
+            $resultSet = $stmt->executeQuery(['now' => (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' =>((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s'), 'id' => $id]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -125,7 +125,7 @@ class ApplicationRepository extends ServiceEntityRepository
 
         $sql = $sql . ';';
         $stmt = $conn->prepare($sql);
-        $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' => (new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day") ]);
+        $resultSet = $stmt->executeQuery(['now' =>  (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s') ]);
 
         // returns an array of arrays (i.e. a raw data set)
         $sql = $sql."ORDER BY os DESC;";
