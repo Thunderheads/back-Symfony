@@ -20,10 +20,6 @@ class CSVManager
 
         return $this->donnesRepository->getAllByID();
 
-
-
-
-
 }
 
 }

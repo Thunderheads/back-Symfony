@@ -7,6 +7,7 @@ use App\Repository\ApplicationRepository;
 use App\Repository\SourceRepository;
 use App\Service\CSVManager;
 use App\Service\Scrapping;
+use Doctrine\ORM\EntityManagerInterface;
 use Goutte\Client;
 use Raulr\GooglePlayScraper\Exception\NotFoundException;
 use Raulr\GooglePlayScraper\Scraper;
@@ -89,5 +90,24 @@ class ApplicationController extends AbstractController
     }
 
 
+    #[Route('/api/application', name: 'application_update', methods: ['PUT'])]
+    public function update(ApplicationRepository $applicationRepo, Request $req): Response
+    {
+        // Récupération du body de la request
+        $body = json_decode($req->getContent());
+        return $this->json($applicationRepo->updateApplication($body),200, [],['groups'=>'application']);
+
+    }
 
 }
+/*
+ * $selectedSortie->setNom($body->nom)
+            ->setDateHeureDebut(new \DateTime($body->dateHeureDebut))
+            ->setDuree(($body->duree))
+            ->setDateLimiteInscription(new \DateTime($body->dateLimiteInscription))
+            ->setNbInscriptionsMax($body->nbInscriptionsMax)
+            ->setInfosSortie($body->infosSortie);
+
+        // Enregistrement en base de donnée
+        $em->flush();
+ */

@@ -27,6 +27,11 @@ class ApplicationRepository extends ServiceEntityRepository
         parent::__construct($registry, Application::class);
     }
 
+    /**
+     * Renvoie la liste des applications triées par leur nom
+     *
+     * @return Application[]|array|object[]
+     */
     public function findAll(){
         return $this->findBy(array(), array('nom' => 'ASC'));
     }
@@ -193,6 +198,29 @@ ON A.id = B.id AND A.os = B.os' ;
         return $application;
     }
 
+
+    /**
+     * Fonction en charge de mettre a jour les urls et le nom d'une application
+     *
+     * @param $body
+     * @return Application|null
+     */
+    public function updateApplication($body){
+
+        $applicationToUpdate = $this->find($body->id);
+        $applicationToUpdate->setNom($body->nom);
+
+        foreach ($body->sources as $newSource){
+            foreach ($applicationToUpdate->getSources() as $oldSource){
+                if($oldSource->getOs()->getNom() == $newSource->os->nom){
+                    $oldSource->setUrl($newSource->url);
+                }
+            }
+        }
+        $this->getEntityManager()->flush();
+
+        return $applicationToUpdate;
+    }
     /*
     public function findOneBySomeField($value): ?Application
     {
