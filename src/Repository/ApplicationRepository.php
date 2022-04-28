@@ -72,36 +72,25 @@ class ApplicationRepository extends ServiceEntityRepository
         $conn = $this->getEntityManager()->getConnection();
 
         $sql =  $sql =
-            'SELECT A.id app_id, A.nom app_nom, A.os, A.rating, A.vote vote_jour, (A.vote - B.vote) diff
-FROM (
-    SELECT application.id, application.nom, os.nom os, donnes.date_collect, donnes.vote, donnes.rating FROM `application` INNER JOIN donnes ON donnes.application_id = application.id
-INNER JOIN `os` ON os.id = donnes.os_id
-INNER JOIN `responsable` ON responsable.id = application.administrateur_id
-WHERE donnes.date_collect = :now
-GROUP BY donnes.id
-) AS A
-
-JOIN (
-    SELECT application.id, application.nom, os.nom os, donnes.date_collect, donnes.vote, donnes.rating FROM `application` INNER JOIN donnes ON donnes.application_id = application.id
-INNER JOIN `os` ON os.id = donnes.os_id
-INNER JOIN `responsable` ON responsable.id = application.administrateur_id
-WHERE donnes.date_collect = :yesterday
-GROUP BY donnes.id
-) AS B
-ON A.id = B.id AND A.os = B.os' ;
+            'SELECT A.id app_id, A.nom app_nom, A.os, A.rating, A.vote vote_jour, (COALESCE(A.vote, 0) - COALESCE(B.vote, 0)) diff 
+                FROM ( 
+                    SELECT application.id, application.nom, os.nom os, donnes.date_collect, donnes.vote, donnes.rating FROM `application` LEFT JOIN ( 
+                        SELECT * FROM donnes WHERE donnes.date_collect = :now ) 
+                        AS donnes ON donnes.application_id = application.id LEFT JOIN `os` ON os.id = donnes.os_id ) 
+                    AS A LEFT JOIN ( SELECT application.id, application.nom, os.nom os, donnes.date_collect, donnes.vote, donnes.rating FROM `application` 
+                        LEFT JOIN ( SELECT * FROM donnes WHERE donnes.date_collect = 
+            :yesterday) AS donnes ON donnes.application_id = application.id LEFT JOIN `os` ON os.id = donnes.os_id )  AS B ON A.id = B.id AND A.os = B.os ';
 
         // cas id mais pas ordre
         if($id != 0 && $ordre == null){
 
-
             $sql = $sql . ' WHERE A.id = :id;';
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00', 'id' => $id]);
+            $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' => (new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day"), 'id' => $id]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
         }
-
 
         // cas ordre mais pas id
         if($id == 0 && $ordre != null){
@@ -112,7 +101,7 @@ ON A.id = B.id AND A.os = B.os' ;
                 $sql = $sql . ' ORDER BY rating DESC;';
             }
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00']);
+            $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' => (new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day")]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -128,7 +117,7 @@ ON A.id = B.id AND A.os = B.os' ;
             }
 
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00', 'id' => $id]);
+            $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' =>(new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day"), 'id' => $id]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -136,9 +125,10 @@ ON A.id = B.id AND A.os = B.os' ;
 
         $sql = $sql . ';';
         $stmt = $conn->prepare($sql);
-        $resultSet = $stmt->executeQuery(['now' => '2022-04-17 00:00:00', 'yesterday' => '2022-04-18 00:00:00']);
+        $resultSet = $stmt->executeQuery(['now' => new \DateTime((new \DateTime('now'))->format('Y-m-d')), 'yesterday' => (new \DateTime((new \DateTime('now '))->format('Y-m-d')))->modify("-1 day") ]);
 
         // returns an array of arrays (i.e. a raw data set)
+        $sql = $sql."ORDER BY os DESC;";
         return $resultSet->fetchAllAssociative();
 
 

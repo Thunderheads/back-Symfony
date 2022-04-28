@@ -49,7 +49,6 @@ class Scrapping
 
         foreach ($lstSources as $source){
             // on lance la fonction getInformation sur ces urls
-            dd(new \DateTime((new \DateTime('now'))->format('Y-m-d')));
             $information = $this->getInformation($source['url']);
             // on crée des objet données que l'on rajoute à la bonne application on spécifiant la version (ios ou android)
             $donnes = new Donnes();

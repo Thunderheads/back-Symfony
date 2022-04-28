@@ -41,7 +41,7 @@ class AppFixtures extends Fixture
     private function oSFixture()
     {
         //OS (ajout android et iOS )
-        $lstOS = ['android', 'os'];
+        $lstOS = ['android', 'iOS'];
         for ($i = 0; $i < 2; $i++) {
             $os = new OS();
             $os->setNom($lstOS[$i]);
