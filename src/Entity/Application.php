@@ -18,7 +18,6 @@ class Application
     private $id;
 
     #[Groups(['donnes', 'application', 'source', 'os', 'application_name'])]
-
     #[ORM\Column(type: 'string', length: 255)]
     private $nom;
 

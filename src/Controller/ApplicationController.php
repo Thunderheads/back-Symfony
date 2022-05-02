@@ -18,34 +18,37 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ApplicationController extends AbstractController
 {
+    //L'ordre des routes est IMPORTANTE NE PAS LA MODIFIER SURTOUT POUR LES GET
+    //comme il existe une route {id} si elle est avant les autres elle sera executé en première et toutes les autres routes seront pas tester
+
     #[Route('/api/application/csv', name: 'application_csv', methods: ['GET'])]
     public function getCSVfile( CSVManager $CSVManager): Response
     {
         return $CSVManager->generateCsvAction();
     }
 
-    #[Route('/api/application/{id}', name: 'application_get_by_id', methods: ['GET'])]
-    public function getById(ApplicationRepository $applicationRepo , $id): Response
+    #[Route('/api/application/daytest', name: 'application_daily_test', methods: ['GET'])]
+    public function getDailyTest( Scrapping $scrapping, ApplicationRepository $applicationRepo): Response
     {
-
-        return $this->json($applicationRepo->find($id),200, [],['groups'=>'application']);
+        // supprimer cette route elle existe juste pour tester des requetes sur l'apple store
+        return $this->json( $scrapping->testMultipleAppleRequest() ,200, [],[]);
     }
 
-    #[Route('/api/application', name: 'application_all_get', methods: ['GET'])]
-    public function getAll(ApplicationRepository $applicationRepo, SourceRepository $sourceRepository, Scrapping $scrapping): Response
-    {
 
-        return $this->json($applicationRepo->test(),200, [],['groups'=>'application']);
+    #[Route('/api/application/daily', name: 'application_daily_insert', methods: ['GET'])]
+    public function getDailyInsert( Scrapping $scrapping, ApplicationRepository $applicationRepo): Response
+    {
+        //Route pour insertion journaliere des données
+        return $this->json( $scrapping->insertDailyData() ,200, [],[]);
     }
 
     // route qui renvoie le nom et l'id de l'application
-    #[Route('/api/application/name', name: 'application_all_get_name', methods: ['GET'])]
-    public function getAllName(ApplicationRepository $applicationRepo, SourceRepository $sourceRepository, Scrapping $scrapping): Response
+    #[Route('/api/application/name', name: 'application_all_get_names', methods: ['GET'])]
+    public function getName(ApplicationRepository $applicationRepo): Response
     {
 
         return $this->json($applicationRepo->findAll(),200, [],['groups'=>'application_name']);
     }
-
     #[Route('/api/application/param', name: 'application_id_get', methods: ['GET'])]
     public function getID(ApplicationRepository $applicationRepo, Request $req): Response
     {
@@ -57,16 +60,28 @@ class ApplicationController extends AbstractController
 
     }
 
+    #[Route('/api/application/{id}', name: 'application_get_by_id', methods: ['GET'])]
+    public function getById(ApplicationRepository $applicationRepo , $id): Response
+    {
+        return $this->json($applicationRepo->find($id),200, [],['groups'=>'application']);
+    }
+
+    #[Route('/api/application', name: 'application_all_get', methods: ['GET'])]
+    public function getAll(ApplicationRepository $applicationRepo, SourceRepository $sourceRepository, Scrapping $scrapping): Response
+    {
+        return $this->json($applicationRepo->test(),200, [],['groups'=>'application']);
+    }
+
+
+
     #[Route('/api/application/', name: 'application_post', methods: ['POST'])]
     public function post(Request $req, Scrapping $scrapping): Response
     {
         $sortieRequest = json_decode($req->getContent());
-
         //A DEBLOQUER QUAND TEST AVEC LA VRAI
         $urlATester = $sortieRequest->urlATester;
         $isInsert = $sortieRequest->isInsert ;
         $nomApp =  $sortieRequest->nomApplication;
-
         //$urlIOSpourTestmarche = "https://apps.apple.com/fr/app/leboncoin/id484115113?";
         //$urlIOSpourTestmarchepas = "https://apps.apple.com/fr/app/leboncoin/id48411511éééééééeée3?";
         //$urlAndroidpourTest = "https://play.google.com/store/apps/details?id=fr.leboncoin&hl=fr&gl=US";
@@ -75,14 +90,14 @@ class ApplicationController extends AbstractController
         if($isInsert){
             $data = $scrapping->insertApp($urlATester, $nomApp);
             if($data != null){
-                return $this->json($data,200, []);
+                return $this->json($data,200, [], ['groups'=>'application']);
             } else {
                 return $this->json($data,400, []);
             }
         } else{
             $data = $scrapping->getInformation($urlATester);
             if($data != null){
-                return $this->json($data,200, []);
+                return $this->json($data,200, [], ['groups'=>'application']);
             } else {
                 return $this->json($data,400, []);
             }

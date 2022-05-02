@@ -31,6 +31,7 @@ class Scrapping
         $this->applicationRepository = $applicationRepository;
         $this->sourceRepository = $sourceRepository;
         $this->donnesRepository = $donnesRepository;
+        $this->oSRepository = $oSRepository;
     }
 
 
@@ -44,23 +45,63 @@ class Scrapping
      */
     public function insertDailyData(){
 
+
         // on recupere toute les urls en bases de données
         $lstSources = $this->sourceRepository->findAllCustom();
 
+        $stat = [];
+
         foreach ($lstSources as $source){
+            $début = new \DateTime('now');
+
             // on lance la fonction getInformation sur ces urls
             $information = $this->getInformation($source['url']);
+
             // on crée des objet données que l'on rajoute à la bonne application on spécifiant la version (ios ou android)
             $donnes = new Donnes();
             $donnes->setApplication($this->applicationRepository->find($source['application_id']));
             $donnes->setOs($this->oSRepository->find($source['os_id']));
-            $donnes->setRating($information["app_note"]);
+            $donnes->setRating((float)$information["app_note"]);
             $donnes->setDateCollect(new \DateTime((new \DateTime('now'))->format('Y-m-d')));
             $donnes->setVote($information["app_nombreAvis"]);
             $this->donnesRepository->add($donnes);
+            $fin  = new \DateTime('now');
+
+            $stat[$source['url']] = $début->diff($fin)->s.".".$début->diff($fin)->f;
         }
+        return $stat;
 
     }
+
+    public function testMultipleAppleRequest(){
+
+        $compteur = 0;
+        $liste = ["https://apps.apple.com/fr/app/instagram/id389801252",
+            "https://apps.apple.com/fr/app/clash-of-clans/id529479190",
+            "https://apps.apple.com/fr/app/fnac-achat-en-ligne/id377379474",
+            "https://apps.apple.com/fr/app/facebook/id284882215",
+            "https://apps.apple.com/fr/app/pacifica/id418531407"
+            ];
+
+        $statPartour = [];
+        $tour = 0;
+        while($tour<30){
+            $tour++;
+            $stat = [];
+            foreach( $liste as $url){
+                $compteur++;
+                $début = new \DateTime('now');
+                $information = $this->getInformation($url);
+                $fin  = new \DateTime('now');
+                $stat[$url] = $début->diff($fin)->s.".".$début->diff($fin)->f;
+            }
+            $statPartour[$tour] = $stat;
+        }
+
+
+        return $statPartour;
+    }
+
 
     /**
      * Fonction en charge d'inserer une application en base de données
@@ -89,6 +130,7 @@ class Scrapping
 
         //Cas application type apple
         if (is_int(strpos($url, $apple))) {
+
             return $this->getAppleAppData($url);
             //Cas application type android
         } else if (is_int(strpos($url, $googleplay))) {
@@ -110,7 +152,8 @@ class Scrapping
         try {
 
             $scraper = new Scraper();
-            $app = $scraper->getApp($this->getAndroidID($urlAndroid));
+
+            $app = $scraper->getApp($this->getAndroidID($urlAndroid), 'fr','fr');
 
             $lstDonnes = array(
                 "app_nom" => $app['title'],
@@ -136,8 +179,15 @@ class Scrapping
         $positionDepart = strpos($urlAndroid, "=") + 1;
         $subString = substr("$urlAndroid", $positionDepart);
         $positionArrivee = strpos($subString, "&");
-        $tailleSequence = strlen($subString);
-        $id = substr("$subString", 0, $positionArrivee - $tailleSequence);
+
+        // si on a un argument dans l'url
+        if($positionArrivee){
+            $tailleSequence = strlen($subString);
+            $id = substr("$subString", 0, $positionArrivee - $tailleSequence);
+        } else {
+            $id = $subString;
+        }
+
         return $id;
     }
 

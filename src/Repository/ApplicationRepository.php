@@ -27,14 +27,7 @@ class ApplicationRepository extends ServiceEntityRepository
         parent::__construct($registry, Application::class);
     }
 
-    /**
-     * Renvoie la liste des applications triées par leur nom
-     *
-     * @return Application[]|array|object[]
-     */
-    public function findAll(){
-        return $this->findBy(array(), array('nom' => 'ASC'));
-    }
+
     /**
      * @throws ORMException
      * @throws OptimisticLockException
@@ -66,7 +59,6 @@ class ApplicationRepository extends ServiceEntityRepository
      * @return Application[] Returns an array of Application objects
      */
 
-
     public function test($id = 0, $ordre = null)
     {
         $conn = $this->getEntityManager()->getConnection();
@@ -81,12 +73,13 @@ class ApplicationRepository extends ServiceEntityRepository
                         LEFT JOIN ( SELECT * FROM donnes WHERE donnes.date_collect = 
             :yesterday) AS donnes ON donnes.application_id = application.id LEFT JOIN `os` ON os.id = donnes.os_id )  AS B ON A.id = B.id AND A.os = B.os ';
 
+
         // cas id mais pas ordre
         if($id != 0 && $ordre == null){
 
             $sql = $sql . ' WHERE A.id = :id;';
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s'), 'id' => $id]);
+            $resultSet = $stmt->executeQuery(['now' => (new \DateTime((new \DateTime('now'))->format('Y-m-d')))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime((new \DateTime('now'))->format('Y-m-d')))->modify("-1 day"))->format('Y-m-d H:i:s'), 'id' => $id]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -101,7 +94,7 @@ class ApplicationRepository extends ServiceEntityRepository
                 $sql = $sql . ' ORDER BY rating DESC;';
             }
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s')]);
+            $resultSet = $stmt->executeQuery(['now' => (new \DateTime((new \DateTime('now'))->format('Y-m-d')))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime((new \DateTime('now'))->format('Y-m-d')))->modify("-1 day"))->format('Y-m-d H:i:s')]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -117,7 +110,7 @@ class ApplicationRepository extends ServiceEntityRepository
             }
 
             $stmt = $conn->prepare($sql);
-            $resultSet = $stmt->executeQuery(['now' => (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' =>((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s'), 'id' => $id]);
+            $resultSet = $stmt->executeQuery(['now' => (new \DateTime((new \DateTime('now'))->format('Y-m-d')))->format('Y-m-d H:i:s'), 'yesterday' =>((new \DateTime((new \DateTime('now'))->format('Y-m-d')))->modify("-1 day"))->format('Y-m-d H:i:s'), 'id' => $id]);
 
             // returns an array of arrays (i.e. a raw data set)
             return $resultSet->fetchAllAssociative();
@@ -125,7 +118,7 @@ class ApplicationRepository extends ServiceEntityRepository
 
         $sql = $sql . ';';
         $stmt = $conn->prepare($sql);
-        $resultSet = $stmt->executeQuery(['now' =>  (new \DateTime('now'))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime('now '))->modify("-1 day"))->format('Y-m-d H:i:s') ]);
+        $resultSet = $stmt->executeQuery(['now' =>  (new \DateTime((new \DateTime('now'))->format('Y-m-d')))->format('Y-m-d H:i:s'), 'yesterday' => ((new \DateTime((new \DateTime('now'))->format('Y-m-d')))->modify("-1 day"))->format('Y-m-d H:i:s') ]);
 
         // returns an array of arrays (i.e. a raw data set)
         $sql = $sql."ORDER BY os DESC;";
@@ -155,11 +148,20 @@ class ApplicationRepository extends ServiceEntityRepository
         // remplir les objets
         //$application->addData();
         if($applicationNom != 'undefined'){
+            // si l'application existe deja
+            if( !is_null(($this->findOneBy(["nom" => $applicationNom])))){
+                $application = $this->findOneBy(["nom" => $applicationNom]);
+            } else{
+                $application->setNom($applicationNom);
+            }
 
-            $application->setNom($applicationNom);
 
         } else {
-            $application->setNom($information['app_nom']);
+            if( !is_null($this->findOneBy(["nom" => $information['app_nom']])) ){
+                $application = $this->findOneBy(["nom" => $information['app_nom']]);
+            } else{
+                $application->setNom($information['app_nom']);
+            }
         }
 
         $this->getEntityManager()->persist($application);
@@ -222,4 +224,15 @@ class ApplicationRepository extends ServiceEntityRepository
         ;
     }
     */
+
+
+    /**
+     * Renvoie la liste des applications triées par leur nom
+     *
+     * @return Application[]|array|object[]
+     */
+    public function findAll(){
+        return $this->findBy(array(), array('nom' => 'ASC'));
+    }
+
 }

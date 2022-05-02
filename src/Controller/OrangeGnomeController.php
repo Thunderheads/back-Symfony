@@ -17,10 +17,25 @@ class OrangeGnomeController extends AbstractController
 
 
         // Android
-        $idGoogleStore = "com.supercell.clashroyale";
+        $idGoogleStoreMarche = "com.kiloo.subwaysurf";
+        $idGoogleStore = "com.orange.caraibe.orangeetmoicaraibe";
+
+
+
+        $client = new Client();
+        $crawler = $client->request('GET', 'https://play.google.com/store/apps/details?id=fr.harmonie.mutuelle.mobile&hl=fr');
+
+        $classCssTitreHuaweiAppGallery = ".title";
+        $classCssNoteHuaweiAppGallery = ".count";
+        $classCssEvalutationsHuaweiAppGallery = ".commentators";
+
+
+        dd($crawler->html());
 
         $scraper = new Scraper();
-        $app = $scraper->getApp($idGoogleStore);
+        // mentionner la langue parce que sinon ça renvoie 0
+        //$app = $scraper->getApp($idGoogleStore, 'fr','fr');
+        $app = $scraper->getApp($idGoogleStore, 'fr', 'fr');
         dd($app);
 
 
@@ -33,7 +48,7 @@ class OrangeGnomeController extends AbstractController
         $client = new Client();
         $crawler = $client->request('GET', $urlapple);
         //avec ça on récupere une note sur le store d'apple comment c'est du HTML avec goutte ça marche
-        dd($crawler->filter($classCssTitreAppleSore)->innerText());
+        $crawler->filter($classCssTitreAppleSore)->innerText();
 
 
         return $this->render('orange_gnome/index.html.twig', [
