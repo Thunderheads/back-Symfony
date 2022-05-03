@@ -129,7 +129,7 @@ class ApplicationRepository extends ServiceEntityRepository
 
 
     /**
-     * Fonction en charge d'ajouter une application et de recuperer la donnée actuelle
+     * Fonction en charge d'ajouter une application et de récuperer la donnée actuelle
      *
      * @param $information
      * @param $applicationNom
@@ -137,9 +137,9 @@ class ApplicationRepository extends ServiceEntityRepository
      * @return Application
      * @throws \Exception
      */
-    public function addApplication($information , $applicationNom, $urlATester) {
+    public function addApplication($information , $applicationNomParam, $urlATester) {
         // instancier des objects
-
+        $applicationNom = trim($applicationNomParam);
         $donnes = new Donnes();
         $application = new Application();
         $source = new Source();
@@ -176,8 +176,6 @@ class ApplicationRepository extends ServiceEntityRepository
         $donnes->setApplication($application);
         $this->getEntityManager()->persist($donnes);
         $this->getEntityManager()->flush();
-
-
 
         $source->setOs($os);
         $source->setApplication($application);

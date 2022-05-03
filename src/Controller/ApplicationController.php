@@ -105,7 +105,7 @@ class ApplicationController extends AbstractController
     }
 
 
-    #[Route('/api/application', name: 'application_update', methods: ['PUT'])]
+    #[Route('/api/application/', name: 'application_update', methods: ['PUT'])]
     public function update(ApplicationRepository $applicationRepo, Request $req): Response
     {
         // Récupération du body de la request
